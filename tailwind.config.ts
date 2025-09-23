@@ -13,6 +13,22 @@ export default {
       },
     },
     extend: {
+      backgroundImage: {
+        'gradient-bg': 'var(--gradient-bg)',
+        'gradient-card': 'var(--gradient-card)',
+        'gradient-player-1': 'var(--gradient-player-1)',
+        'gradient-player-2': 'var(--gradient-player-2)',
+      },
+      boxShadow: {
+        'soft': 'var(--shadow-soft)',
+        'medium': 'var(--shadow-medium)',
+        'strong': 'var(--shadow-strong)',
+      },
+      fontFamily: {
+        'heading': 'var(--font-heading)',
+        'body': 'var(--font-body)',
+        'game': 'var(--font-game)',
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -46,6 +62,27 @@ export default {
         card: {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
+        },
+        // Game-specific colors
+        'player-1': {
+          DEFAULT: "hsl(var(--player-1))",
+          light: "hsl(var(--player-1-light))",
+          foreground: "hsl(var(--player-1-foreground))",
+        },
+        'player-2': {
+          DEFAULT: "hsl(var(--player-2))",
+          light: "hsl(var(--player-2-light))",
+          foreground: "hsl(var(--player-2-foreground))",
+        },
+        'grid': {
+          cell: "hsl(var(--grid-cell))",
+          'cell-hover': "hsl(var(--grid-cell-hover))",
+          border: "hsl(var(--grid-border))",
+          letter: "hsl(var(--grid-letter))",
+        },
+        'score': {
+          highlight: "hsl(var(--score-highlight))",
+          'highlight-bg': "hsl(var(--score-highlight-bg))",
         },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
