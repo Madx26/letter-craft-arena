@@ -4,8 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { ArrowLeft, RotateCcw, Trophy, Star, Crown } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { RotateCcw, Trophy, Star, Crown } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import GameGrid from "@/components/GameGrid";
 import PlayerPanel from "@/components/PlayerPanel";
@@ -27,7 +26,6 @@ export type Word = {
 const GRID_SIZE = 8;
 
 const Game = () => {
-  const navigate = useNavigate();
   const { toast } = useToast();
   
   const [grid, setGrid] = useState<CellState[][]>(() => 
@@ -38,6 +36,7 @@ const Game = () => {
   const [letterInput, setLetterInput] = useState("");
   const [scores, setScores] = useState({ player1: 0, player2: 0 });
   const [words, setWords] = useState<Word[]>([]);
+  const [usedWords, setUsedWords] = useState<Set<string>>(new Set());
   const [gameEnded, setGameEnded] = useState(false);
   const [winner, setWinner] = useState<1 | 2 | 'tie' | null>(null);
 
@@ -57,7 +56,7 @@ const Game = () => {
           wordCells.push(cell);
         } else {
           if (currentWord.length >= 2) {
-            if (validateWord(currentWord)) {
+            if (validateWord(currentWord) && !usedWords.has(currentWord.toLowerCase())) {
               const lastPlayerId = wordCells[wordCells.length - 1].playerId;
               newWords.push({
                 text: currentWord,
@@ -86,7 +85,7 @@ const Game = () => {
           wordCells.push(cell);
         } else {
           if (currentWord.length >= 2) {
-            if (validateWord(currentWord)) {
+            if (validateWord(currentWord) && !usedWords.has(currentWord.toLowerCase())) {
               const lastPlayerId = wordCells[wordCells.length - 1].playerId;
               newWords.push({
                 text: currentWord,
@@ -146,6 +145,11 @@ const Game = () => {
     }
 
     setWords(prev => [...prev, ...newWords]);
+    setUsedWords(prev => {
+      const newSet = new Set(prev);
+      newWords.forEach(word => newSet.add(word.text.toLowerCase()));
+      return newSet;
+    });
     setGrid(newGrid);
     setSelectedCell(null);
     setLetterInput("");
@@ -172,6 +176,7 @@ const Game = () => {
     setLetterInput("");
     setScores({ player1: 0, player2: 0 });
     setWords([]);
+    setUsedWords(new Set());
     setGameEnded(false);
     setWinner(null);
   };
@@ -187,14 +192,7 @@ const Game = () => {
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
-          <Button 
-            onClick={() => navigate('/')}
-            variant="ghost"
-            className="text-muted-foreground hover:text-foreground"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Menu
-          </Button>
+          <div></div>
           
           <h1 className="text-3xl font-heading font-bold text-foreground">
             Word<span className="text-player-1">Grid</span>
@@ -331,16 +329,9 @@ const Game = () => {
             <div className="flex gap-2">
               <Button 
                 onClick={resetGame}
-                className="flex-1 bg-gradient-player-1 hover:opacity-90 text-player-1-foreground"
+                className="w-full bg-gradient-player-1 hover:opacity-90 text-player-1-foreground"
               >
                 Play Again
-              </Button>
-              <Button 
-                onClick={() => navigate('/')}
-                variant="outline"
-                className="flex-1 border-border hover:bg-muted"
-              >
-                Menu
               </Button>
             </div>
           </div>
