@@ -38,6 +38,7 @@ const Game = () => {
   const [letterInput, setLetterInput] = useState("");
   const [scores, setScores] = useState({ player1: 0, player2: 0 });
   const [words, setWords] = useState<Word[]>([]);
+  const [usedWords, setUsedWords] = useState<Set<string>>(new Set());
   const [gameEnded, setGameEnded] = useState(false);
   const [winner, setWinner] = useState<1 | 2 | 'tie' | null>(null);
 
@@ -127,9 +128,10 @@ const Game = () => {
       })
     );
 
-    // Check for new words
+    // Check for new words and filter out duplicates
     const newWords = checkForWords(newGrid);
-    const wordsForCurrentPlayer = newWords.filter(word => word.playerId === currentPlayer);
+    const uniqueNewWords = newWords.filter(word => !usedWords.has(word.text.toUpperCase()));
+    const wordsForCurrentPlayer = uniqueNewWords.filter(word => word.playerId === currentPlayer);
     
     if (wordsForCurrentPlayer.length > 0) {
       const pointsScored = wordsForCurrentPlayer.reduce((sum, word) => sum + word.score, 0);
@@ -145,7 +147,11 @@ const Game = () => {
       });
     }
 
-    setWords(prev => [...prev, ...newWords]);
+    // Add unique words to history and used words set
+    if (uniqueNewWords.length > 0) {
+      setWords(prev => [...prev, ...uniqueNewWords]);
+      setUsedWords(prev => new Set([...prev, ...uniqueNewWords.map(w => w.text.toUpperCase())]));
+    }
     setGrid(newGrid);
     setSelectedCell(null);
     setLetterInput("");
@@ -172,6 +178,7 @@ const Game = () => {
     setLetterInput("");
     setScores({ player1: 0, player2: 0 });
     setWords([]);
+    setUsedWords(new Set());
     setGameEnded(false);
     setWinner(null);
   };
@@ -187,15 +194,6 @@ const Game = () => {
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
-          <Button 
-            onClick={() => navigate('/')}
-            variant="ghost"
-            className="text-muted-foreground hover:text-foreground"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Menu
-          </Button>
-          
           <h1 className="text-3xl font-heading font-bold text-foreground">
             Word<span className="text-player-1">Grid</span>
           </h1>
@@ -210,9 +208,27 @@ const Game = () => {
           </Button>
         </div>
 
-        <div className="grid lg:grid-cols-4 gap-6">
-          {/* Player Panels */}
-          <div className="lg:col-span-1 space-y-4">
+        <div className="grid lg:grid-cols-[300px_1fr] gap-6">
+          {/* Left Sidebar */}
+          <div className="space-y-4">
+            {/* Quick Rules */}
+            <Card className="bg-gradient-card border-border shadow-medium">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg font-heading">Rules</CardTitle>
+              </CardHeader>
+              <CardContent className="text-sm text-muted-foreground space-y-2">
+                <p>• Take turns placing letters</p>
+                <p>• Form words horizontally or vertically (min 2 letters)</p>
+                <p>• No duplicate words score</p>
+                <p>• Grid full = game ends</p>
+                <p>• Highest score wins!</p>
+              </CardContent>
+            </Card>
+
+            {/* Word History */}
+            <WordHistory words={words} />
+
+            {/* Player Panels */}
             <PlayerPanel 
               playerId={1}
               score={scores.player1}
@@ -228,7 +244,7 @@ const Game = () => {
           </div>
 
           {/* Game Board */}
-          <div className="lg:col-span-2">
+          <div>
             <Card className="bg-gradient-card border-border shadow-medium">
               <CardHeader className="pb-4">
                 <CardTitle className="text-center font-heading">
@@ -285,11 +301,6 @@ const Game = () => {
                 )}
               </CardContent>
             </Card>
-          </div>
-
-          {/* Word History */}
-          <div className="lg:col-span-1">
-            <WordHistory words={words} />
           </div>
         </div>
       </div>
